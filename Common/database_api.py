@@ -1,6 +1,8 @@
 from flask import Flask
+from flask.globals import session
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource, fields, marshal_with, reqparse, abort
+from sqlalchemy.sql.schema import Table
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../net_app.db'
@@ -38,7 +40,7 @@ resource_update_args.add_argument("date_created", type=str, help="Resource times
 resource_update_args.add_argument("mega_bits_per_second", type=float, help="Resource Mb/s is required!")
 
 
-# API CLASS RESOURCE
+# API CLASSES 
 class ResourceAPI(Resource):
 
     @marshal_with(resource_fields)
@@ -88,8 +90,14 @@ class ResourceAPI(Resource):
         return result
 
 
+class ResourceAPISub(ResourceAPI): 
+    def get(self):
+        return {"nr_resources": db.session.query(ResourceModel.id).count()}
+
+
 # REGISTER API
 api.add_resource(ResourceAPI, "/resource/<int:res_id>")
+api.add_resource(ResourceAPISub, "/nr_resources")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,3 +1,4 @@
+from flask_restful.fields import Integer
 import requests
 from datetime import datetime
 
@@ -30,3 +31,7 @@ input()
 for i in range(len(data)):
     response = requests.get(BASE + "resource/" + str(i))
     print(response.json())
+
+input()
+response = requests.get(BASE + "nr_resources")
+print("Tot nr of db recordings : " + (str)(response.json()['nr_resources']))
