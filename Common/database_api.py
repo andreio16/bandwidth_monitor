@@ -8,7 +8,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../net_app.db'
 api = Api(app)
 db = SQLAlchemy(app)
 
-
+# DEFINE THE DB TABLE
 class ResourceModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date_created = db.Column(db.String(50), nullable=False)
