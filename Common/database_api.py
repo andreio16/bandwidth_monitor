@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource, fields, marshal_with, reqparse, abort
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///net_app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../net_app.db'
 
 api = Api(app)
 db = SQLAlchemy(app)
@@ -21,6 +21,7 @@ class ResourceModel(db.Model):
 # db.create_all()
 
 
+# RES_FIELD FOR SERIALIZING THE RETURN RESULT
 resource_fields = {
     'id': fields.Integer,
     'date_created': fields.String,

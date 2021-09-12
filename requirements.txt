@@ -3,6 +3,7 @@ pytz==2020.1
 click==7.1.2
 Flask==1.1.2
 flake8==3.9.2
+psutil==5.8.0
 Jinja2==2.11.2
 Werkzeug==1.0.1
 requests==2.26.0
