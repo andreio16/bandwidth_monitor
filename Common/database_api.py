@@ -13,11 +13,11 @@ db = SQLAlchemy(app)
 # DEFINE THE DB TABLE
 class ResourceModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date_created = db.Column(db.String(50), nullable=False)
+    timestamp = db.Column(db.String(50), nullable=False)
     mega_bits_per_second = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
-        return f"Resource(Mb/s = {self.mega_bits_per_second}, timestamp = {self.date_created})"
+        return f"Resource(Mb/s = {self.mega_bits_per_second}, timestamp = {self.timestamp})"
 
 
 # db.create_all()
@@ -26,17 +26,17 @@ class ResourceModel(db.Model):
 # RES_FIELD FOR SERIALIZING THE RETURN RESULT
 resource_fields = {
     'id': fields.Integer,
-    'date_created': fields.String,
+    'timestamp': fields.String,
     'mega_bits_per_second': fields.Float
 }
 
 
 resource_put_args = reqparse.RequestParser()
-resource_put_args.add_argument("date_created", type=str, help="Resource timestamp is required!", required=True)
+resource_put_args.add_argument("timestamp", type=str, help="Resource timestamp is required!", required=True)
 resource_put_args.add_argument("mega_bits_per_second", type=float, help="Resource Mb/s is required!", required=True)
 
 resource_update_args = reqparse.RequestParser()
-resource_update_args.add_argument("date_created", type=str, help="Resource timestamp is required!")
+resource_update_args.add_argument("timestamp", type=str, help="Resource timestamp is required!")
 resource_update_args.add_argument("mega_bits_per_second", type=float, help="Resource Mb/s is required!")
 
 
@@ -58,7 +58,7 @@ class ResourceAPI(Resource):
         if result:
             abort(409, message="Db tuple id taken...")
 
-        new_tuple = ResourceModel(id=res_id, date_created=args['date_created'], mega_bits_per_second=args['mega_bits_per_second'])
+        new_tuple = ResourceModel(id=res_id, timestamp=args['timestamp'], mega_bits_per_second=args['mega_bits_per_second'])
         db.session.add(new_tuple)
         db.session.commit()
         return new_tuple, 201
@@ -70,8 +70,8 @@ class ResourceAPI(Resource):
 
         if not result:
             abort(404, message="Db tuple doesn't exist, cannot update")
-        if args['date_created']:
-            result.date_created = args["date_created"]
+        if args['timestamp']:
+            result.timestamp = args["timestamp"]
         if args['mega_bits_per_second']:
             result.mega_bits_per_second = args["mega_bits_per_second"]
 
