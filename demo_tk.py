@@ -1,7 +1,8 @@
 #region imports
 import requests
-import tkinter as tk
 import matplotlib
+import tkinter as tk
+import subprocess, os, signal
 import matplotlib.animation as animation
 
 from tkinter import *
@@ -19,16 +20,16 @@ style.use("ggplot")
 #endregion
 
 #region Global variables
-BASE = "http://127.0.0.1:5000/"
 root = Tk()
 label_frame = LabelFrame(root)
 btn_show_diagram = Button(label_frame)
 btn_start_server = Button(label_frame)
 btn_reset_server = Button(label_frame)
-
 figure = Figure(figsize=(6.5, 3), dpi=100)
 chart = figure.add_subplot(111)
 
+server_process = None
+BASE = "http://127.0.0.1:5000/"
 #endregion
 
 #region Functions
@@ -53,11 +54,13 @@ def init_btn_start_server():
     btn_start_server.config(text="Start Server")
     btn_start_server.grid(column=0, row=0, padx=5, pady=10)
     btn_start_server.config(bg="azure", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
+    btn_start_server.config(command=btn_start_server_on_click)
 
 def init_btn_reset_server():
-    btn_reset_server.config(text="Reset Server", command=del_all_tuples_from_db)
+    btn_reset_server.config(text="Reset Server")
     btn_reset_server.grid(column=0, row=1, padx=5, pady=10)
     btn_reset_server.config(bg="azure", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
+    btn_reset_server.config(command=btn_reset_server_on_click, state="disable")
 
 def init_btn_draw_diagram():
     btn_show_diagram.config(text="Draw")
@@ -79,6 +82,7 @@ def init_chart_diagram(x_list=[], y_list=[]):
     # background computing / we need to bring it up to tkinter interface
     chart.clear()
     chart.plot(x_list, y_list)
+    chart.xaxis.set_ticks(range(0, len(x_list), 2))
 
     canvas = FigureCanvasTkAgg(figure, master=root)
     canvas.draw()
@@ -91,10 +95,22 @@ def init_chart_diagram(x_list=[], y_list=[]):
 
 
 # UI action func
+
 def btn_draw_diagram_on_click():
     x_time_axis_list, y_values_axis_list = extract_data_from_db()
     init_chart_diagram(x_time_axis_list, y_values_axis_list)
 
+def btn_start_server_on_click():
+    global server_process
+    server_process = subprocess.Popen(["python", "./Common/database_api.py"])    
+    btn_start_server.config(state="disable")
+    btn_reset_server.config(state="normal")
+
+def btn_reset_server_on_click():   
+    init_chart_diagram()
+    terminate_process(server_process)
+    btn_start_server.config(state="normal")
+    btn_reset_server.config(state="disable")
 
 
 # Database operations func
@@ -106,8 +122,8 @@ def extract_data_from_db():
     for i in range(lenght):
         response = requests.get(BASE + "resource/" + str(i))
 
+        # extract only the time hms from the datetime
         temp_time = response.json()['timestamp'][12:]
-        # temp_time = datetime.strptime(temp_time, "%d %b %Y, %H:%M:%S")
         temp_resource = response.json()['mega_bits_per_second']
 
         time.append(temp_time)
@@ -125,8 +141,19 @@ def get_nr_of_tuples_from_db():
     return response.json()['nr_resources']
 
 
+# Process win func
+def terminate_process(process):
+    from subprocess import call
+    if process.poll() is None:
+        call('taskkill /F /T /PID ' + str(process.pid))
 
 #endregion
 
-initialize_gui_design()
-root.mainloop()
+
+
+#region Main func
+if __name__ == "__main__":
+    initialize_gui_design()
+    root.mainloop()
+
+#endregion
