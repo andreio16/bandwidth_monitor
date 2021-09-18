@@ -53,20 +53,20 @@ def init_buttons_group():
 def init_btn_start_server():
     btn_start_server.config(text="Start Server")
     btn_start_server.grid(column=0, row=0, padx=5, pady=10)
-    btn_start_server.config(bg="azure", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
+    btn_start_server.config(bg="DarkSeaGreen1", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
     btn_start_server.config(command=btn_start_server_on_click)
 
 def init_btn_reset_server():
     btn_reset_server.config(text="Reset Server")
     btn_reset_server.grid(column=0, row=1, padx=5, pady=10)
-    btn_reset_server.config(bg="azure", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
+    btn_reset_server.config(bg="cornsilk", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
     btn_reset_server.config(command=btn_reset_server_on_click, state="disable")
 
 def init_btn_draw_diagram():
     btn_show_diagram.config(text="Draw")
     btn_show_diagram.grid(column=1, row=0, padx=5, pady=10)
     btn_show_diagram.config(command=btn_draw_diagram_on_click)
-    btn_show_diagram.config(bg="azure", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
+    btn_show_diagram.config(bg="GhostWhite", fg="black", borderwidth=2, relief=tk.RAISED, font="Terminal 8")
 
 def initialize_gui_design():
     # root window 
@@ -95,22 +95,26 @@ def init_chart_diagram(x_list=[], y_list=[]):
 
 
 # UI action func
-
 def btn_draw_diagram_on_click():
-    x_time_axis_list, y_values_axis_list = extract_data_from_db()
-    init_chart_diagram(x_time_axis_list, y_values_axis_list)
+    is_server_ok, server_message = check_db_server_status()
+
+    if is_server_ok == False:
+        tk.messagebox.showwarning(title='Server status.', message=server_message)
+    else:
+        x_time_axis_list, y_values_axis_list = extract_data_from_db()
+        init_chart_diagram(x_time_axis_list, y_values_axis_list)
 
 def btn_start_server_on_click():
     global server_process
     server_process = subprocess.Popen(["python", "./Common/database_api.py"])    
-    btn_start_server.config(state="disable")
-    btn_reset_server.config(state="normal")
+    btn_reset_server.config(state="normal", bg="DarkSeaGreen1")
+    btn_start_server.config(state="disable", bg="cornsilk")
 
 def btn_reset_server_on_click():   
     init_chart_diagram()
     terminate_process(server_process)
-    btn_start_server.config(state="normal")
-    btn_reset_server.config(state="disable")
+    btn_reset_server.config(state="disable", bg="cornsilk")
+    btn_start_server.config(state="normal", bg="DarkSeaGreen1")
 
 
 # Database operations func
@@ -136,9 +140,21 @@ def del_all_tuples_from_db():
     for i in range(lenght):
         response = requests.delete(BASE + "resource/" + str(i))
 
+def check_db_server_status():
+    is_db_running = True
+    message_status = 'Database running...'
+    try:
+        length = get_nr_of_tuples_from_db()
+    except Exception as e:
+        message_status = 'Server is down, please perform a restart.'
+        is_db_running = False
+    return is_db_running, message_status
+
 def get_nr_of_tuples_from_db():
     response = requests.get(BASE + "nr_resources")
     return response.json()['nr_resources']
+
+
 
 
 # Process win func
@@ -152,8 +168,10 @@ def terminate_process(process):
 
 
 #region Main func
-if __name__ == "__main__":
+def Main():
     initialize_gui_design()
     root.mainloop()
 
+if __name__ == "__main__":
+    Main()
 #endregion
