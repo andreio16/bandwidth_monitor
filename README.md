@@ -3,8 +3,8 @@
 
 A simple Python aplication for visualizing the network data used. (upload/download) :smile:
 ### Build with
-* Tkinter for GUI presentation layer
-* Flask for server-side, API and database components 
+* Tkinter for GUI presentation layer.
+* Flask for server-side, API and database components .
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -26,17 +26,17 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Development evolution and issue tracking
 
-- [x] Test the basic API functionalities
+- [x] Test the basic API functionalities.
 ![workflow](https://i.imgur.com/TkfxwsO.png)
 
-- [x] Tkinter GUI design
+- [x] Tkinter GUI design.
 
 - [x] Update the GUI according to harcoded data. (with \Common\test_api_requests.py)
 Draw the graph by getting the data the db server.
 
 - [x] Build a infinite loop for inserting the tacker data into db. 
 
-- [ ] App is freezing on start server button
+- [ ] App is freezing on start server button.
 ![workflow](https://i.imgur.com/En0OkwS.png)
 
 
