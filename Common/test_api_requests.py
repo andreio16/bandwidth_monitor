@@ -48,7 +48,9 @@ data = []
 #     response = requests.put(BASE + "resource/" + str(i), json_obj)
 #     data.append(json_obj)
 
+
 input()
 for i in range(10):
     response = requests.get(BASE + "resource/" + str(i))
+    # response = requests.delete(BASE + "resource/"+ str(i))
     print(response.json())

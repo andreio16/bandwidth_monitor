@@ -1,4 +1,5 @@
 #region imports
+import time
 import requests
 import matplotlib
 import tkinter as tk
@@ -6,11 +7,10 @@ import subprocess, os, signal
 import matplotlib.animation as animation
 
 from tkinter import *
-from time import sleep
-from datetime import date, datetime
-from Common import network_tracker
 from matplotlib import style
 from matplotlib.figure import Figure
+from datetime import date, datetime
+from Common.network_tracker import NetworkTracker 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 
@@ -29,6 +29,7 @@ figure = Figure(figsize=(6.5, 3), dpi=100)
 chart = figure.add_subplot(111)
 
 server_process = None
+bandwidth_tracker = NetworkTracker()
 BASE = "http://127.0.0.1:5000/"
 #endregion
 
@@ -106,15 +107,29 @@ def btn_draw_diagram_on_click():
 
 def btn_start_server_on_click():
     global server_process
-    server_process = subprocess.Popen(["python", "./Common/database_api.py"])    
+    server_process = subprocess.Popen(["python", "./Common/db_api_server.py"])    
     btn_reset_server.config(state="normal", bg="DarkSeaGreen1")
     btn_start_server.config(state="disable", bg="cornsilk")
+    bandwidth_tracker.dispose()
+    while True:
+        if bandwidth_tracker.traker_started == False:
+            break
+        # Get the upload/download speed from bit/s to Mbit/s
+        time.sleep(5)
+        upload_speed = (bandwidth_tracker.get_current_upload_speed() / (2**20))
+        download_speed = (bandwidth_tracker.get_current_download_speed() / (2**20))
+        total_data_used = round(bandwidth_tracker.get_total_data_used() / (2**20), 3)
+        send_tuple_to_db(datetime.now(), total_data_used)
 
 def btn_reset_server_on_click():   
     init_chart_diagram()
     terminate_process(server_process)
     btn_reset_server.config(state="disable", bg="cornsilk")
     btn_start_server.config(state="normal", bg="DarkSeaGreen1")
+    if bandwidth_tracker.traker_started:
+        bandwidth_tracker.dispose()
+    else:
+        bandwidth_tracker.activate()
 
 
 # Database operations func
@@ -122,6 +137,7 @@ def extract_data_from_db():
     time = []
     resource = []
     lenght = get_nr_of_tuples_from_db()
+    print(lenght)
 
     for i in range(lenght):
         response = requests.get(BASE + "resource/" + str(i))
@@ -154,6 +170,18 @@ def get_nr_of_tuples_from_db():
     response = requests.get(BASE + "nr_resources")
     return response.json()['nr_resources']
 
+# def get_next_tuple_index_from_db():
+#     if get_nr_of_tuples_from_db() > 0:
+#         return get_nr_of_tuples_from_db() + 1
+#     else:
+#         return 0
+
+def send_tuple_to_db(timestamp, bandwidth_val):
+    json_obj = {}
+    tuple_idx = get_nr_of_tuples_from_db()
+    json_obj['mega_bits_per_second'] = bandwidth_val
+    json_obj['timestamp'] = timestamp.strftime("%d %b %Y, %H:%M:%S")
+    requests.put(BASE + "resource/" + str(tuple_idx), json_obj)
 
 
 

@@ -11,6 +11,7 @@ BYTES_RECV = 1
 class NetworkTracker:
     
     def __init__(self) -> None:
+        self.traker_started = True
         self.initial_bytes_sent = self.get_total_bytes_sent()
         self.initial_bytes_recv = self.get_total_bytes_recv()
 
@@ -22,10 +23,16 @@ class NetworkTracker:
         # returns the time as floating point number expressed in seconds since the epoch, in UTC.
         self.last_bytes_sent_recv = time.time()
 
+    def dispose(self):
+        self.traker_started = False
+
+    def activate(self):
+        self.traker_started = True
 
     def get_total_bytes_sent(self):
         return psutil.net_io_counters(pernic=False)[BYTES_SENT]
-    def get_total_byt_recv(self):
+
+    def get_total_bytes_recv(self):
         return psutil.net_io_counters(pernic=False)[BYTES_RECV]
 
 
