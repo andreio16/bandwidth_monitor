@@ -31,6 +31,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 - [x] Tkinter GUI design.
 
+- [x] Build the NetworkTraker class with [psutil](https://psutil.readthedocs.io/en/latest/index.html?highlight=net_io_counters).
+
 - [x] Update the GUI according to harcoded data. (with \Common\test_api_requests.py)
 Draw the graph by getting the data the db server.
 
